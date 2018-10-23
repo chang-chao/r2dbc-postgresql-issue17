@@ -25,8 +25,10 @@ public class RawInnerJoinSelect {
 
 			Flux<Integer> createTable = h.execute(
 					"CREATE TABLE  IF NOT EXISTS mapping_error_test (id SERIAL PRIMARY KEY, short_val smallint)");
+			Flux<Integer> count = h.execute("select id from mapping_error_test limit 1");
 			Flux<Integer> createdata = h.execute("INSERT INTO mapping_error_test(short_val) VALUES (1)");
-			return createTable.concatWith(createdata);
+			return createTable.then(count.singleOrEmpty()
+					.flatMapMany(c -> (c == 0 ? createdata : Flux.<Integer>empty())).singleOrEmpty()).then().flux();
 
 		}).blockLast();
 
