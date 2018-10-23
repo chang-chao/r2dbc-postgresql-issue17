@@ -4,6 +4,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.r2dbc.client.R2dbc;
 import io.r2dbc.postgresql.PostgresqlConnectionConfiguration;
@@ -11,6 +13,8 @@ import io.r2dbc.postgresql.PostgresqlConnectionFactory;
 import reactor.core.publisher.Flux;
 
 public class RawInnerJoinSelect {
+
+	private static final Logger LOG = LoggerFactory.getLogger(RawInnerJoinSelect.class);
 
 	public static void main(String... args) throws InterruptedException {
 		PostgresqlConnectionConfiguration configuration = PostgresqlConnectionConfiguration.builder().host("localhost")
@@ -30,11 +34,11 @@ public class RawInnerJoinSelect {
 		r2dbc.withHandle(handle -> handle.select("select * from mapping_error_test")
 				.mapResult(result -> result.map((rw, rm) -> rw.get("short_val", Integer.class)))
 				.onErrorResume((Function<Throwable, Publisher<Integer>>) throwable -> {
-					System.out.println("1");
+					LOG.error("1. doOnError", throwable);
 					latch.countDown();
 					throw new IllegalArgumentException();
 				})).doOnError(throwable -> {
-					System.out.println("2");
+					LOG.error("2. doOnError", throwable);
 					latch.countDown();
 				}).subscribe();
 
