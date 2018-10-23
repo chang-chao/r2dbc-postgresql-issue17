@@ -28,7 +28,7 @@ public class RawInnerJoinSelect {
 
 		CountDownLatch latch = new CountDownLatch(2);
 		r2dbc.withHandle(handle -> handle.select("select * from mapping_error_test")
-				.mapResult(result -> result.map((rw, rm) -> rw.get("short_id", Integer.class)))
+				.mapResult(result -> result.map((rw, rm) -> rw.get("short_val", Integer.class)))
 				.onErrorResume((Function<Throwable, Publisher<Integer>>) throwable -> {
 					System.out.println("1");
 					latch.countDown();
